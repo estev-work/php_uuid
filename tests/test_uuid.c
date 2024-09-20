@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "../include/uuid.h"  // Убедитесь, что путь к заголовочному файлу правильный
+#include "../uuid.h"
 
-// Функция для проверки формата UUID (включая версию и вариант)
 int is_valid_uuid(const char* uuid, int expected_version) {
     if (strlen(uuid) != 36) {
         return 0;
@@ -22,16 +21,13 @@ int is_valid_uuid(const char* uuid, int expected_version) {
         }
     }
 
-    // Проверка версии UUID
     if (expected_version > 0) {
-        // Версия находится в 15-м символе (индекс 14, 0-индексация)
         char version_char = uuid[14];
-        if (version_char != (expected_version + '0')) {  // Преобразуем ожидаемую версию в символ
+        if (version_char != (expected_version + '0')) {
             return 0;
         }
     }
 
-    // Проверка варианта UUID (начинается с 8, 9, A, или B)
     char variant_char = uuid[19];
     if (!(variant_char == '8' || variant_char == '9' || variant_char == 'a' || variant_char == 'A' ||
           variant_char == 'b' || variant_char == 'B')) {
@@ -41,7 +37,6 @@ int is_valid_uuid(const char* uuid, int expected_version) {
     return 1;
 }
 
-// Тест функции generate_uuid_v1
 void test_generate_uuid_v1() {
     char* uuid = generate_uuid_v1();
     if (is_valid_uuid(uuid, 1)) {
@@ -52,10 +47,8 @@ void test_generate_uuid_v1() {
     free(uuid);
 }
 
-// Тест функции generate_uuid_v2
 void test_generate_uuid_v2() {
     char* uuid = generate_uuid_v2();
-    // Предполагаем, что v2 не реализован и возвращает сообщение
     if (strcmp(uuid, "UUID v2 generation not implemented") == 0) {
         printf("generate_uuid_v2: PASS\n");
     } else {
@@ -64,7 +57,6 @@ void test_generate_uuid_v2() {
     free(uuid);
 }
 
-// Тест функции generate_uuid_v3
 void test_generate_uuid_v3() {
     const char* namespace_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     const char* name = "example";
@@ -77,7 +69,6 @@ void test_generate_uuid_v3() {
     free(uuid);
 }
 
-// Тест функции generate_uuid_v4
 void test_generate_uuid_v4() {
     char* uuid = generate_uuid_v4();
     if (is_valid_uuid(uuid, 4)) {
@@ -88,7 +79,6 @@ void test_generate_uuid_v4() {
     free(uuid);
 }
 
-// Тест функции generate_uuid_v5
 void test_generate_uuid_v5() {
     const char* namespace_uuid = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     const char* name = "example";
@@ -101,7 +91,6 @@ void test_generate_uuid_v5() {
     free(uuid);
 }
 
-// Тест функции generate_uuid_v7
 void test_generate_uuid_v7() {
     char* uuid = generate_uuid_v7();
     if (is_valid_uuid(uuid, 7)) {
@@ -112,7 +101,6 @@ void test_generate_uuid_v7() {
     free(uuid);
 }
 
-// Тест функции generate_uuid_nil
 void test_generate_uuid_nil() {
     char* uuid = generate_uuid_nil();
     if (strcmp(uuid, "00000000-0000-0000-0000-000000000000") == 0) {

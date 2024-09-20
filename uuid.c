@@ -48,7 +48,6 @@ void format_uuid(unsigned char uuid[16], char *uuid_str) {
     );
 }
 
-/* UUID v1: Time-based */
 PHP_FUNCTION(generate_uuid_v1) {
         char uuid_str[37];
         unsigned char uuid[16];
@@ -60,21 +59,19 @@ PHP_FUNCTION(generate_uuid_v1) {
         clock_gettime(CLOCK_REALTIME, &ts);
         time_now = ((uint64_t)ts.tv_sec * 10000000) + ((uint64_t)ts.tv_nsec / 100);
 
-        /* Adjust for UUID epoch difference */
         time_now += 0x01B21DD213814000ULL;
 
-        /* Construct UUID */
         uuid[0] = (time_now >> 24) & 0xFF;
         uuid[1] = (time_now >> 16) & 0xFF;
         uuid[2] = (time_now >> 8) & 0xFF;
         uuid[3] = time_now & 0xFF;
         uuid[4] = (time_now >> 40) & 0xFF;
         uuid[5] = (time_now >> 32) & 0xFF;
-        uuid[6] = ((time_now >> 56) & 0x0F) | 0x10; // Version 1
+        uuid[6] = ((time_now >> 56) & 0x0F) | 0x10;
         uuid[7] = (time_now >> 48) & 0xFF;
 
         random_bytes((unsigned char*)&clock_seq, sizeof(clock_seq));
-        clock_seq = (clock_seq & 0x3FFF) | 0x8000; // Variant
+        clock_seq = (clock_seq & 0x3FFF) | 0x8000;
 
         uuid[8] = (clock_seq >> 8) & 0xFF;
         uuid[9] = clock_seq & 0xFF;
@@ -85,13 +82,10 @@ PHP_FUNCTION(generate_uuid_v1) {
         RETURN_STRING(uuid_str);
 }
 
-/* UUID v2: DCE Security version */
 PHP_FUNCTION(generate_uuid_v2) {
-        // UUID v2 is implementation-specific and not commonly used.
         RETURN_STRING("UUID v2 generation not implemented");
 }
 
-/* UUID v3: Name-based MD5 hash */
 PHP_FUNCTION(generate_uuid_v3) {
         char *namespace_uuid, *name;
         size_t namespace_len, name_len;
@@ -104,7 +98,6 @@ PHP_FUNCTION(generate_uuid_v3) {
             RETURN_THROWS();
         }
 
-        /* Convert namespace UUID to bytes */
         sscanf(namespace_uuid,
         "%02hhx%02hhx%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx",
         &namespace_bytes[0], &namespace_bytes[1], &namespace_bytes[2], &namespace_bytes[3],
@@ -112,37 +105,32 @@ PHP_FUNCTION(generate_uuid_v3) {
         &namespace_bytes[8], &namespace_bytes[9], &namespace_bytes[10], &namespace_bytes[11],
         &namespace_bytes[12], &namespace_bytes[13], &namespace_bytes[14], &namespace_bytes[15]);
 
-        /* Compute MD5 hash of namespace and name */
         MD5_CTX c;
         MD5_Init(&c);
         MD5_Update(&c, namespace_bytes, 16);
         MD5_Update(&c, name, name_len);
         MD5_Final(hash, &c);
 
-        /* Set version and variant */
-        hash[6] = (hash[6] & 0x0F) | 0x30; // Version 3
+        hash[6] = (hash[6] & 0x0F) | 0x30;
         hash[8] = (hash[8] & 0x3F) | 0x80;
 
         format_uuid(hash, uuid_str);
         RETURN_STRING(uuid_str);
 }
 
-/* UUID v4: Random */
 PHP_FUNCTION(generate_uuid_v4) {
         char uuid_str[37];
         unsigned char uuid[16];
 
         random_bytes(uuid, 16);
 
-        /* Set version and variant */
-        uuid[6] = (uuid[6] & 0x0F) | 0x40; // Version 4
+        uuid[6] = (uuid[6] & 0x0F) | 0x40;
         uuid[8] = (uuid[8] & 0x3F) | 0x80;
 
         format_uuid(uuid, uuid_str);
         RETURN_STRING(uuid_str);
 }
 
-/* UUID v5: Name-based SHA-1 hash */
 PHP_FUNCTION(generate_uuid_v5) {
         char *namespace_uuid, *name;
         size_t namespace_len, name_len;
@@ -155,7 +143,6 @@ PHP_FUNCTION(generate_uuid_v5) {
             RETURN_THROWS();
         }
 
-        /* Convert namespace UUID to bytes */
         sscanf(namespace_uuid,
         "%02hhx%02hhx%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx",
         &namespace_bytes[0], &namespace_bytes[1], &namespace_bytes[2], &namespace_bytes[3],
@@ -163,25 +150,21 @@ PHP_FUNCTION(generate_uuid_v5) {
         &namespace_bytes[8], &namespace_bytes[9], &namespace_bytes[10], &namespace_bytes[11],
         &namespace_bytes[12], &namespace_bytes[13], &namespace_bytes[14], &namespace_bytes[15]);
 
-        /* Compute SHA1 hash of namespace and name */
         SHA_CTX c;
         SHA1_Init(&c);
         SHA1_Update(&c, namespace_bytes, 16);
         SHA1_Update(&c, name, name_len);
         SHA1_Final(hash, &c);
 
-        /* Use the first 16 bytes */
         memcpy(uuid, hash, 16);
 
-        /* Set version and variant */
-        uuid[6] = (uuid[6] & 0x0F) | 0x50; // Version 5
+        uuid[6] = (uuid[6] & 0x0F) | 0x50;
         uuid[8] = (uuid[8] & 0x3F) | 0x80;
 
         format_uuid(uuid, uuid_str);
         RETURN_STRING(uuid_str);
 }
 
-/* UUID v7: Time-ordered */
 PHP_FUNCTION(generate_uuid_v7) {
         char uuid_str[37];
         unsigned char uuid[16];
@@ -207,7 +190,6 @@ PHP_FUNCTION(generate_uuid_v7) {
         RETURN_STRING(uuid_str);
 }
 
-/* Nil UUID */
 PHP_FUNCTION(generate_uuid_nil) {
         RETURN_STRING("00000000-0000-0000-0000-000000000000");
 }
