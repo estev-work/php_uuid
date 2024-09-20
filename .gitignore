@@ -6,7 +6,6 @@
 /.libs/
 /build/
 /modules/
-/include/
 
 # Autotools generated files
 autom4te.cache/
@@ -16,7 +15,6 @@ config.status
 
 # Configuration headers and scripts
 config.h
-Makefile
 Makefile.*
 libtool
 uuid.dep
