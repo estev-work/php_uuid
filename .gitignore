@@ -50,17 +50,19 @@ uuid.lo
 *.log
 
 # Test output
-/tests/output/
+/tests/build/
+tests/*.exe
+tests/*.out
 
 # IDE/editor specific (optional)
 # Uncomment the following lines if you use these tools
 # VS Code
-#.vscode/
+.vscode/
 # Sublime Text
-#*.sublime-project
-#*.sublime-workspace
+# *.sublime-project
+# *.sublime-workspace
 # PHPStorm
-#.idea/
+.idea/
 
 # ----------------------------
 # End of .gitignore

@@ -7,29 +7,23 @@
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v1, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v1,0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v2, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v2,0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v3, 0, 2, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v3,0, 2, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, namespace_uuid, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v4, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v4,0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v5, 0, 2, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v5,0, 2, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, namespace_uuid, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v7, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v7,0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_nil, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_nil,0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
         void random_bytes(unsigned char *buf, size_t len) {
@@ -60,7 +54,7 @@ PHP_FUNCTION(generate_uuid_v1) {
         unsigned char uuid[16];
         uint64_t time_now;
         uint16_t clock_seq;
-        uint8_t node[6] = {0x00, 0x0C, 0x29, 0x3E, 0x5C, 0x7F}; // Example MAC address
+        uint8_t node[6] = { 0x00, 0x0C, 0x29, 0x3E, 0x5C, 0x7F }; // Example MAC address
 
         struct timespec ts;
         clock_gettime(CLOCK_REALTIME, &ts);
