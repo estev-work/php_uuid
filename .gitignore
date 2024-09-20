@@ -1,0 +1,67 @@
+# ----------------------------
+# PHP Extension UUID Project
+# ----------------------------
+
+# Build directories
+/.libs/
+/build/
+/modules/
+/include/
+
+# Autotools generated files
+autom4te.cache/
+config.log
+config.nice
+config.status
+
+# Configuration headers and scripts
+config.h
+Makefile
+Makefile.*
+libtool
+uuid.dep
+uuid.la
+uuid.lo
+
+# Generated configuration scripts (optional)
+# If you prefer to generate these files yourself, uncomment the lines below
+# and ensure they are not tracked by Git.
+# /configure
+# /config.h.in
+
+# Object files and libraries
+*.o
+*.so
+*.a
+*.dylib
+*.exe
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# PHP specific
+/vendor/
+*.phar
+
+# Logs
+*.log
+
+# Test output
+/tests/output/
+
+# IDE/editor specific (optional)
+# Uncomment the following lines if you use these tools
+# VS Code
+#.vscode/
+# Sublime Text
+#*.sublime-project
+#*.sublime-workspace
+# PHPStorm
+#.idea/
+
+# ----------------------------
+# End of .gitignore
+# ----------------------------
