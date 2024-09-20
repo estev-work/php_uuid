@@ -4,26 +4,33 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
-#include <openssl/md5.h>
-#include <openssl/sha.h>
+#include <openssl/evp.h> // Новый EVP API для MD5 и SHA1
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v1,0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v1, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v2,0, 0, IS_STRING, 0)
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v2, 0, 2, IS_STRING, 0)
+ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
+ZEND_ARG_TYPE_INFO(0, local_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v3,0, 2, IS_STRING, 0)
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v3, 0, 2, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, namespace_uuid, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v4,0, 0, IS_STRING, 0)
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v4, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v5,0, 2, IS_STRING, 0)
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v5, 0, 2, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, namespace_uuid, IS_STRING, 0)
 ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v7,0, 0, IS_STRING, 0)
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_v7, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_nil,0, 0, IS_STRING, 0)
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_generate_uuid_nil, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
         void random_bytes(unsigned char *buf, size_t len) {
@@ -83,7 +90,47 @@ PHP_FUNCTION(generate_uuid_v1) {
 }
 
 PHP_FUNCTION(generate_uuid_v2) {
-        RETURN_STRING("UUID v2 generation not implemented");
+        char uuid_str[37];
+        unsigned char uuid[16];
+        uint64_t timestamp;
+        uint32_t local_id;
+        zend_long domain;
+
+        if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &domain, &local_id) == FAILURE) {
+            RETURN_THROWS();
+        }
+
+        if (domain < 0 || domain > 2) {
+            zend_throw_error(NULL, "Invalid domain value. Must be 0 (PERSON), 1 (GROUP), or 2 (ORG).");
+            RETURN_NULL();
+        }
+
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        timestamp = (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+        uuid[0] = (timestamp >> 24) & 0xFF;
+        uuid[1] = (timestamp >> 16) & 0xFF;
+        uuid[2] = (timestamp >> 8) & 0xFF;
+        uuid[3] = timestamp & 0xFF;
+
+        uuid[4] = (timestamp >> 40) & 0xFF;
+        uuid[5] = (timestamp >> 32) & 0xFF;
+        uuid[6] = ((timestamp >> 56) & 0x0F) | 0x20;  // Версия 2
+
+        uuid[7] = 0x80 | ((timestamp >> 48) & 0x3F);
+
+        uuid[8] = (local_id >> 24) & 0xFF;
+        uuid[9] = (local_id >> 16) & 0xFF;
+        uuid[10] = (local_id >> 8) & 0xFF;
+        uuid[11] = local_id & 0xFF;
+
+        uuid[12] = (domain & 0x0F);
+
+        random_bytes(&uuid[13], 3);
+
+        format_uuid(uuid, uuid_str);
+        RETURN_STRING(uuid_str);
 }
 
 PHP_FUNCTION(generate_uuid_v3) {
@@ -105,14 +152,17 @@ PHP_FUNCTION(generate_uuid_v3) {
         &namespace_bytes[8], &namespace_bytes[9], &namespace_bytes[10], &namespace_bytes[11],
         &namespace_bytes[12], &namespace_bytes[13], &namespace_bytes[14], &namespace_bytes[15]);
 
-        MD5_CTX c;
-        MD5_Init(&c);
-        MD5_Update(&c, namespace_bytes, 16);
-        MD5_Update(&c, name, name_len);
-        MD5_Final(hash, &c);
+        EVP_MD_CTX *mdctx;
+        const EVP_MD *md = EVP_md5();
+        mdctx = EVP_MD_CTX_new();
+        EVP_DigestInit_ex(mdctx, md, NULL);
+        EVP_DigestUpdate(mdctx, namespace_bytes, 16);
+        EVP_DigestUpdate(mdctx, name, name_len);
+        EVP_DigestFinal_ex(mdctx, hash, NULL);
+        EVP_MD_CTX_free(mdctx);
 
-        hash[6] = (hash[6] & 0x0F) | 0x30;
-        hash[8] = (hash[8] & 0x3F) | 0x80;
+        hash[6] = (hash[6] & 0x0F) | 0x30; // Set version to 3
+        hash[8] = (hash[8] & 0x3F) | 0x80; // Set variant
 
         format_uuid(hash, uuid_str);
         RETURN_STRING(uuid_str);
@@ -150,16 +200,19 @@ PHP_FUNCTION(generate_uuid_v5) {
         &namespace_bytes[8], &namespace_bytes[9], &namespace_bytes[10], &namespace_bytes[11],
         &namespace_bytes[12], &namespace_bytes[13], &namespace_bytes[14], &namespace_bytes[15]);
 
-        SHA_CTX c;
-        SHA1_Init(&c);
-        SHA1_Update(&c, namespace_bytes, 16);
-        SHA1_Update(&c, name, name_len);
-        SHA1_Final(hash, &c);
+        EVP_MD_CTX *mdctx;
+        const EVP_MD *md = EVP_sha1();
+        mdctx = EVP_MD_CTX_new();
+        EVP_DigestInit_ex(mdctx, md, NULL);
+        EVP_DigestUpdate(mdctx, namespace_bytes, 16);
+        EVP_DigestUpdate(mdctx, name, name_len);
+        EVP_DigestFinal_ex(mdctx, hash, NULL);
+        EVP_MD_CTX_free(mdctx);
 
         memcpy(uuid, hash, 16);
 
-        uuid[6] = (uuid[6] & 0x0F) | 0x50;
-        uuid[8] = (uuid[8] & 0x3F) | 0x80;
+        uuid[6] = (uuid[6] & 0x0F) | 0x50; // Set version to 5
+        uuid[8] = (uuid[8] & 0x3F) | 0x80; // Set variant
 
         format_uuid(uuid, uuid_str);
         RETURN_STRING(uuid_str);
