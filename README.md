@@ -1,29 +1,4 @@
-Certainly! Below is a comprehensive `README.md` file for your PHP UUID extension project, written in both **Russian** and **English**. This README includes sections such as project description, features, installation instructions, usage examples, testing procedures, and contribution guidelines.
-
----
-
 # PHP UUID Extension
-
-## Table of Contents
-
-1. [Описание проекта](#описание-проекта)
-2. [Особенности](#особенности)
-3. [Установка](#установка)
-4. [Использование](#использование)
-5. [Тестирование](#тестирование)
-6. [Вклад в проект](#вклад-в-проект)
-7. [Лицензия](#лицензия)
-8. [Project Description](#project-description)
-9. [Features](#features)
-10. [Installation](#installation)
-11. [Usage](#usage)
-12. [Testing](#testing)
-13. [Contributing](#contributing)
-14. [License](#license)
-
----
-
-## Описание проекта
 
 PHP расширение для генерации UUID (Universally Unique Identifier) различных версий: 1, 2, 3, 4, 5, 7 и Nil. Расширение написано на языке C и предназначено для использования в PHP 8.3 и более ранних версиях.
 
@@ -110,47 +85,6 @@ UUID v5: 21f7f8de-8051-5b89-8680-0195ef798b6a
 UUID v7: 0187f6b5-05c0-7e80-9a4e-2bafc0c90269
 UUID Nil: 00000000-0000-0000-0000-000000000000
 ```
-
-## Тестирование
-
-Проект включает C-основанные тесты для проверки всех функций генерации UUID.
-
-### Сборка и запуск тестов
-
-1. **Перейдите в каталог тестов:**
-
-    ```bash
-    cd tests
-    ```
-
-2. **Сделайте скрипт тестов исполняемым:**
-
-    ```bash
-    chmod +x run_tests.sh
-    ```
-
-3. **Запустите тесты:**
-
-    ```bash
-    ./run_tests.sh
-    ```
-
-### Ожидаемый вывод
-
-```
-Running UUID Generation Tests...
-
-generate_uuid_v1: PASS
-generate_uuid_v2: PASS
-generate_uuid_v3: PASS
-generate_uuid_v4: PASS
-generate_uuid_v5: PASS
-generate_uuid_v7: PASS
-generate_uuid_nil: PASS
-
-All tests completed.
-```
-
 ### Использование Valgrind для проверки утечек памяти (опционально)
 
 ```bash
